@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
+const { handleValidationErrors } = require('../helpers/errorHandlers');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -18,16 +19,7 @@ const createCard = (req, res) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные',
-        });
-      }
-      res
-        .status(SERVER_ERROR)
-        .send({
-          message: 'На сервере произошла ошибка',
-        });
+      handleValidationErrors(err, res);
     });
 };
 

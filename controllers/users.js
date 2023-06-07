@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
+const { handleValidationErrors } = require('../helpers/errorHandlers');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -36,16 +37,7 @@ const createUser = (req, res) => {
   User.create(req.body)
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные',
-        });
-      }
-      res
-        .status(SERVER_ERROR)
-        .send({
-          message: 'На сервере произошла ошибка',
-        });
+      handleValidationErrors(err, res);
     });
 };
 
@@ -71,16 +63,7 @@ const updateUserInfo = (req, res) => {
       res.status(200).send(updatedUser);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные',
-        });
-      }
-      res
-        .status(SERVER_ERROR)
-        .send({
-          message: 'На сервере произошла ошибка',
-        });
+      handleValidationErrors(err, res);
     });
 };
 
@@ -106,14 +89,7 @@ const updateUserAvatar = (req, res) => {
       res.status(200).send(updatedUser);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные',
-        });
-      }
-      res.status(SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
-      });
+      handleValidationErrors(err, res);
     });
 };
 
