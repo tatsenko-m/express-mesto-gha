@@ -13,10 +13,10 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .orFail(() => new Error('Не найдено'))
+    .orFail(() => new Error('Пользователь не найден'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.message === 'Не найдено') {
+      if (err.message === 'Пользователь не найден') {
         res
           .status(NOT_FOUND)
           .send({
