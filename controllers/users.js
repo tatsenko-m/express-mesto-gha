@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
+const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -35,11 +35,18 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   User.create(req.body)
     .then((user) => res.status(201).send(user))
-    .catch(() => res
-      .status(SERVER_ERROR)
-      .send({
-        message: 'На сервере произошла ошибка',
-      }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({
+          message: 'Переданы некорректные данные',
+        });
+      }
+      res
+        .status(SERVER_ERROR)
+        .send({
+          message: 'На сервере произошла ошибка',
+        });
+    });
 };
 
 const updateUserInfo = (req, res) => {
@@ -57,11 +64,18 @@ const updateUserInfo = (req, res) => {
       }
       res.status(200).send(updatedUser);
     })
-    .catch(() => res
-      .status(SERVER_ERROR)
-      .send({
-        message: 'На сервере произошла ошибка',
-      }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({
+          message: 'Переданы некорректные данные',
+        });
+      }
+      res
+        .status(SERVER_ERROR)
+        .send({
+          message: 'На сервере произошла ошибка',
+        });
+    });
 };
 
 const updateUserAvatar = (req, res) => {
@@ -79,11 +93,18 @@ const updateUserAvatar = (req, res) => {
       }
       res.status(200).send(updatedUser);
     })
-    .catch(() => res
-      .status(SERVER_ERROR)
-      .send({
-        message: 'На сервере произошла ошибка',
-      }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({
+          message: 'Переданы некорректные данные',
+        });
+      }
+      res
+        .status(SERVER_ERROR)
+        .send({
+          message: 'На сервере произошла ошибка',
+        });
+    });
 };
 
 module.exports = {
