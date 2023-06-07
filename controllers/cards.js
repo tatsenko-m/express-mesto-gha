@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
 
@@ -55,10 +56,8 @@ const deleteCardById = (req, res) => {
 
 const likeCard = (req, res) => {
   const cardId = req.params.cardId;
-  const card = new Card({ _id: cardId });
-  const validationError = card.validateSync();
 
-  if (validationError) {
+  if (!mongoose.isValidObjectId(cardId)) {
     return res.status(BAD_REQUEST).send({
       message: 'Переданы некорректные данные',
     });
@@ -84,10 +83,8 @@ const likeCard = (req, res) => {
 
 const unlikeCard = (req, res) => {
   const cardId = req.params.cardId;
-  const card = new Card({ _id: cardId });
-  const validationError = card.validateSync();
 
-  if (validationError) {
+  if (!mongoose.isValidObjectId(cardId)) {
     return res.status(BAD_REQUEST).send({
       message: 'Переданы некорректные данные',
     });
