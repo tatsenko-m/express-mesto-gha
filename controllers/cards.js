@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
+const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -12,8 +12,19 @@ const getCards = (req, res) => {
 };
 
 const createCard = (req, res) => {
-  Card.create(req.body)
-    .then((card) => res.status(201).send(card))
+  const { name, link } = req.body;
+  const card = new Card({ name, link, owner: req.user._id });
+  const validationError = card.validateSync();
+
+  if (validationError) {
+    return res.status(BAD_REQUEST).send({
+      message: 'Переданы некорректные данные',
+    });
+  }
+
+  card
+    .save()
+    .then((savedCard) => res.status(201).send(savedCard))
     .catch(() => res
       .status(SERVER_ERROR)
       .send({
@@ -44,11 +55,18 @@ const deleteCardById = (req, res) => {
 
 const likeCard = (req, res) => {
   const cardId = req.params.cardId;
-  const userId = req.user._id;
+  const card = new Card({ _id: cardId });
+  const validationError = card.validateSync();
+
+  if (validationError) {
+    return res.status(BAD_REQUEST).send({
+      message: 'Переданы некорректные данные',
+    });
+  }
 
   Card.findByIdAndUpdate(
     cardId,
-    { $addToSet: { likes: userId } },
+    { $addToSet: { likes: req.user._id } },
     { new: true }
   )
     .then((updatedCard) => {
@@ -66,11 +84,18 @@ const likeCard = (req, res) => {
 
 const unlikeCard = (req, res) => {
   const cardId = req.params.cardId;
-  const userId = req.user._id;
+  const card = new Card({ _id: cardId });
+  const validationError = card.validateSync();
+
+  if (validationError) {
+    return res.status(BAD_REQUEST).send({
+      message: 'Переданы некорректные данные',
+    });
+  }
 
   Card.findByIdAndUpdate(
     cardId,
-    { $pull: { likes: userId } },
+    { $pull: { likes: req.user._id } },
     { new: true }
   )
     .then((updatedCard) => {
