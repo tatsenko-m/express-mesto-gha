@@ -51,16 +51,16 @@ const updateUserInfo = (req, res) => {
     });
   }
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     userId,
     { name, about },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((updatedUser) => {
       if (!updatedUser) {
         return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
       }
-      res.status(200).send(updatedUser);
+      return res.status(200).send(updatedUser);
     })
     .catch((err) => {
       handleValidationErrors(err, res);
@@ -77,16 +77,16 @@ const updateUserAvatar = (req, res) => {
     });
   }
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     userId,
     { avatar },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((updatedUser) => {
       if (!updatedUser) {
         return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
       }
-      res.status(200).send(updatedUser);
+      return res.status(200).send(updatedUser);
     })
     .catch((err) => {
       handleValidationErrors(err, res);

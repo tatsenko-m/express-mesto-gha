@@ -4,7 +4,7 @@ const handleValidationErrors = (err, res) => {
   if (err.name === 'ValidationError') {
     return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
   }
-  res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+  return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
 };
 
 module.exports = {

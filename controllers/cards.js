@@ -45,7 +45,7 @@ const deleteCardById = (req, res) => {
 };
 
 const likeCard = (req, res) => {
-  const cardId = req.params.cardId;
+  const { cardId } = req.params;
 
   if (!mongoose.isValidObjectId(cardId)) {
     return res.status(BAD_REQUEST).send({
@@ -53,16 +53,16 @@ const likeCard = (req, res) => {
     });
   }
 
-  Card.findByIdAndUpdate(
+  return Card.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .then((updatedCard) => {
       if (!updatedCard) {
         return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
-      res.status(200).send(updatedCard);
+      return res.status(200).send(updatedCard);
     })
     .catch(() => res
       .status(SERVER_ERROR)
@@ -72,7 +72,7 @@ const likeCard = (req, res) => {
 };
 
 const unlikeCard = (req, res) => {
-  const cardId = req.params.cardId;
+  const { cardId } = req.params;
 
   if (!mongoose.isValidObjectId(cardId)) {
     return res.status(BAD_REQUEST).send({
@@ -80,16 +80,16 @@ const unlikeCard = (req, res) => {
     });
   }
 
-  Card.findByIdAndUpdate(
+  return Card.findByIdAndUpdate(
     cardId,
     { $pull: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .then((updatedCard) => {
       if (!updatedCard) {
         return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
-      res.status(200).send(updatedCard);
+      return res.status(200).send(updatedCard);
     })
     .catch(() => res
       .status(SERVER_ERROR)
