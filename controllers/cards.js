@@ -42,8 +42,54 @@ const deleteCardById = (req, res) => {
     });
 };
 
+const likeCard = (req, res) => {
+  const cardId = req.params.cardId;
+  const userId = req.user._id;
+
+  Card.findByIdAndUpdate(
+    cardId,
+    { $addToSet: { likes: userId } },
+    { new: true }
+  )
+    .then((updatedCard) => {
+      if (!updatedCard) {
+        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+      }
+      res.status(200).send(updatedCard);
+    })
+    .catch(() => res
+      .status(SERVER_ERROR)
+      .send({
+        message: 'На сервере произошла ошибка',
+      }));
+};
+
+const unlikeCard = (req, res) => {
+  const cardId = req.params.cardId;
+  const userId = req.user._id;
+
+  Card.findByIdAndUpdate(
+    cardId,
+    { $pull: { likes: userId } },
+    { new: true }
+  )
+    .then((updatedCard) => {
+      if (!updatedCard) {
+        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+      }
+      res.status(200).send(updatedCard);
+    })
+    .catch(() => res
+      .status(SERVER_ERROR)
+      .send({
+        message: 'На сервере произошла ошибка',
+      }));
+};
+
 module.exports = {
   getCards,
   createCard,
   deleteCardById,
+  likeCard,
+  unlikeCard,
 };
