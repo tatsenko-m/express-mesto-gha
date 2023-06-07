@@ -11,7 +11,7 @@ const getUsers = (req, res) => {
 };
 
 const getUserById = (req, res) => {
-  User.findById(req.params.id)
+  User.findById(req.params.userId)
     .orFail(() => new Error('Не найдено'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
