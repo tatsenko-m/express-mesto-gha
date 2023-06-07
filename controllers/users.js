@@ -53,6 +53,12 @@ const updateUserInfo = (req, res) => {
   const userId = req.user._id;
   const { name, about } = req.body;
 
+  if (!name && !about) {
+    return res.status(BAD_REQUEST).send({
+      message: 'Переданы некорректные данные',
+    });
+  }
+
   User.findByIdAndUpdate(
     userId,
     { name, about },
@@ -82,6 +88,12 @@ const updateUserAvatar = (req, res) => {
   const userId = req.user._id;
   const { avatar } = req.body;
 
+  if (!avatar) {
+    return res.status(BAD_REQUEST).send({
+      message: 'Переданы некорректные данные',
+    });
+  }
+
   User.findByIdAndUpdate(
     userId,
     { avatar },
@@ -99,11 +111,9 @@ const updateUserAvatar = (req, res) => {
           message: 'Переданы некорректные данные',
         });
       }
-      res
-        .status(SERVER_ERROR)
-        .send({
-          message: 'На сервере произошла ошибка',
-        });
+      res.status(SERVER_ERROR).send({
+        message: 'На сервере произошла ошибка',
+      });
     });
 };
 
