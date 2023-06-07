@@ -42,8 +42,54 @@ const createUser = (req, res) => {
       }));
 };
 
+const updateUserInfo = (req, res) => {
+  const userId = req.user._id;
+  const { name, about } = req.body;
+
+  User.findByIdAndUpdate(
+    userId,
+    { name, about },
+    { new: true, runValidators: true }
+  )
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+      }
+      res.status(200).send(updatedUser);
+    })
+    .catch(() => res
+      .status(SERVER_ERROR)
+      .send({
+        message: 'На сервере произошла ошибка',
+      }));
+};
+
+const updateUserAvatar = (req, res) => {
+  const userId = req.user._id;
+  const { avatar } = req.body;
+
+  User.findByIdAndUpdate(
+    userId,
+    { avatar },
+    { new: true, runValidators: true }
+  )
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+      }
+      res.status(200).send(updatedUser);
+    })
+    .catch(() => res
+      .status(SERVER_ERROR)
+      .send({
+        message: 'На сервере произошла ошибка',
+      }));
+};
+
 module.exports = {
   getUsers,
   getUserById,
   createUser,
+  updateUserInfo,
+  updateUserAvatar,
 };
