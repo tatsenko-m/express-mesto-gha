@@ -14,23 +14,21 @@ const getCards = (req, res) => {
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
-  const card = new Card({ name, link, owner: req.user._id });
-  const validationError = card.validateSync();
 
-  if (validationError) {
-    return res.status(BAD_REQUEST).send({
-      message: 'Переданы некорректные данные',
+  Card.create({ name, link, owner: req.user._id })
+    .then((card) => res.status(201).send(card))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({
+          message: 'Переданы некорректные данные',
+        });
+      }
+      res
+        .status(SERVER_ERROR)
+        .send({
+          message: 'На сервере произошла ошибка',
+        });
     });
-  }
-
-  card
-    .save()
-    .then((savedCard) => res.status(201).send(savedCard))
-    .catch(() => res
-      .status(SERVER_ERROR)
-      .send({
-        message: 'На сервере произошла ошибка',
-      }));
 };
 
 const deleteCardById = (req, res) => {
