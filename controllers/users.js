@@ -14,7 +14,7 @@ const getUsers = (req, res) => {
 };
 
 const getUserById = (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(NOT_FOUND).send({
@@ -22,14 +22,14 @@ const getUserById = (req, res) => {
     });
   }
 
-  User.findById(userId)
+  return User.findById(userId)
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND).send({
           message: 'Пользователь не найден',
         });
       }
-      res.status(200).send(user);
+      return res.status(200).send(user);
     })
     .catch(() => {
       res.status(SERVER_ERROR).send({
