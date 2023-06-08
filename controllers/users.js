@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const User = require('../models/user');
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
 const { handleValidationErrors } = require('../helpers/errorHandlers');
@@ -13,23 +14,27 @@ const getUsers = (req, res) => {
 };
 
 const getUserById = (req, res) => {
-  User.findById(req.params.userId)
-    .orFail(() => new Error('Пользователь не найден'))
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      if (err.message === 'Пользователь не найден') {
-        res
-          .status(NOT_FOUND)
-          .send({
-            message: err.message,
-          });
-      } else {
-        res
-          .status(SERVER_ERROR)
-          .send({
-            message: 'На сервере произошла ошибка',
-          });
+  const userId = req.params.userId;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(NOT_FOUND).send({
+      message: 'Пользователь не найден',
+    });
+  }
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({
+          message: 'Пользователь не найден',
+        });
       }
+      res.status(200).send(user);
+    })
+    .catch(() => {
+      res.status(SERVER_ERROR).send({
+        message: 'На сервере произошла ошибка',
+      });
     });
 };
 
