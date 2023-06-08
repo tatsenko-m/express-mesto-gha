@@ -24,7 +24,15 @@ const createCard = (req, res) => {
 };
 
 const deleteCardById = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  const { cardId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+    return res.status(BAD_REQUEST).send({
+      message: 'Переданы некорректные данные',
+    });
+  }
+
+  return Card.findByIdAndRemove(cardId)
     .orFail(() => new Error('Карточка не найдена'))
     .then((deletedCard) => res.status(200).send(deletedCard))
     .catch((err) => {
