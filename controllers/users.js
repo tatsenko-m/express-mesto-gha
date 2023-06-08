@@ -17,8 +17,8 @@ const getUserById = (req, res) => {
   const { userId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return res.status(NOT_FOUND).send({
-      message: 'Пользователь не найден',
+    return res.status(BAD_REQUEST).send({
+      message: 'Переданы некорректные данные',
     });
   }
 
