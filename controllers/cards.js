@@ -1,6 +1,5 @@
-const mongoose = require('mongoose');
 const Card = require('../models/card');
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
+const { NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
 const { handleValidationErrors } = require('../helpers/errorHandlers');
 
 const getCards = (req, res) => {
@@ -26,40 +25,22 @@ const createCard = (req, res) => {
 const deleteCardById = (req, res) => {
   const { cardId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(cardId)) {
-    return res.status(BAD_REQUEST).send({
-      message: 'Переданы некорректные данные',
-    });
-  }
-
   return Card.findByIdAndRemove(cardId)
     .orFail(() => new Error('Карточка не найдена'))
     .then((deletedCard) => res.status(200).send(deletedCard))
     .catch((err) => {
       if (err.message === 'Карточка не найдена') {
-        res
-          .status(NOT_FOUND)
-          .send({
-            message: err.message,
-          });
+        res.status(NOT_FOUND).send({
+          message: err.message,
+        });
       } else {
-        res
-          .status(SERVER_ERROR)
-          .send({
-            message: 'На сервере произошла ошибка',
-          });
+        handleValidationErrors(err, res);
       }
     });
 };
 
 const likeCard = (req, res) => {
   const { cardId } = req.params;
-
-  if (!mongoose.isValidObjectId(cardId)) {
-    return res.status(BAD_REQUEST).send({
-      message: 'Переданы некорректные данные',
-    });
-  }
 
   return Card.findByIdAndUpdate(
     cardId,
@@ -72,21 +53,13 @@ const likeCard = (req, res) => {
       }
       return res.status(200).send(updatedCard);
     })
-    .catch(() => res
-      .status(SERVER_ERROR)
-      .send({
-        message: 'На сервере произошла ошибка',
-      }));
+    .catch((err) => {
+      handleValidationErrors(err, res);
+    });
 };
 
 const unlikeCard = (req, res) => {
   const { cardId } = req.params;
-
-  if (!mongoose.isValidObjectId(cardId)) {
-    return res.status(BAD_REQUEST).send({
-      message: 'Переданы некорректные данные',
-    });
-  }
 
   return Card.findByIdAndUpdate(
     cardId,
@@ -99,11 +72,9 @@ const unlikeCard = (req, res) => {
       }
       return res.status(200).send(updatedCard);
     })
-    .catch(() => res
-      .status(SERVER_ERROR)
-      .send({
-        message: 'На сервере произошла ошибка',
-      }));
+    .catch((err) => {
+      handleValidationErrors(err, res);
+    });
 };
 
 module.exports = {

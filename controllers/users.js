@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const User = require('../models/user');
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
 const { handleValidationErrors } = require('../helpers/errorHandlers');
@@ -16,12 +15,6 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   const { userId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return res.status(BAD_REQUEST).send({
-      message: 'Переданы некорректные данные',
-    });
-  }
-
   return User.findById(userId)
     .then((user) => {
       if (!user) {
@@ -31,10 +24,8 @@ const getUserById = (req, res) => {
       }
       return res.status(200).send(user);
     })
-    .catch(() => {
-      res.status(SERVER_ERROR).send({
-        message: 'На сервере произошла ошибка',
-      });
+    .catch((err) => {
+      handleValidationErrors(err, res);
     });
 };
 
