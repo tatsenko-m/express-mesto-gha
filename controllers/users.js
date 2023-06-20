@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR, UNAUTHORIZED } = require('../constants/errorStatus');
+const {
+  BAD_REQUEST, NOT_FOUND, SERVER_ERROR, UNAUTHORIZED,
+} = require('../constants/errorStatus');
 const { handleValidationErrors } = require('../helpers/errorHandlers');
 
 const getUsers = (req, res) => {
