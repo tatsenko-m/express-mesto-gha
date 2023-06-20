@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const { login, createUser } = require('./controllers/users');
 const router = require('./routes/index');
-const cookieParser = require('cookie-parser');
 
 const app = express();
 
