@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
+const { NOT_FOUND, SERVER_ERROR, FORBIDDEN } = require('../constants/errorStatus');
 const { handleValidationErrors } = require('../helpers/errorHandlers');
 
 const getCards = (req, res) => {
@@ -23,19 +23,23 @@ const createCard = (req, res) => {
 };
 
 const deleteCardById = (req, res) => {
-  const { cardId } = req.params;
-
-  return Card.findByIdAndRemove(cardId)
-    .orFail(() => new Error('Карточка не найдена'))
-    .then((deletedCard) => res.status(200).send(deletedCard))
-    .catch((err) => {
-      if (err.message === 'Карточка не найдена') {
-        res.status(NOT_FOUND).send({
-          message: err.message,
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        return res.status(NOT_FOUND).send({
+          message: 'Карточка не найдена',
         });
-      } else {
-        handleValidationErrors(err, res);
       }
+      if (String(req.user._id) !== String(card.owner)) {
+        return res.status(FORBIDDEN).send({
+          message: 'Доступ запрещен',
+        });
+      }
+      return Card.findByIdAndRemove(req.params.cardId)
+        .then((deletedCard) => res.status(200).send(deletedCard));
+    })
+    .catch((err) => {
+      handleValidationErrors(err, res);
     });
 };
 
