@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   BAD_REQUEST, NOT_FOUND, SERVER_ERROR, UNAUTHORIZED,
@@ -45,8 +46,6 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  let authUser;
-
   User.findOne({ email })
     .then((user) => {
       if (!user) {
@@ -55,16 +54,23 @@ const login = (req, res) => {
         });
       }
 
-      authUser = user;
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new Error('Неправильные почта или пароль'));
+          }
 
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
-      }
+          const token = jwt.sign({ _id: user._id }, 'SECRET', { expiresIn: '7d' });
 
-      return res.status(200).send(authUser);
+          res
+            .cookie('jwt', token, {
+              maxAge: 3600000,
+              httpOnly: true,
+              sameSite: 'strict',
+            });
+
+          return res.status(200).send(user);
+        });
     })
     .catch((err) => {
       if (err.message === 'Неправильные почта или пароль') {
