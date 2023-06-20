@@ -81,6 +81,23 @@ const login = (req, res) => {
     });
 };
 
+const getCurrentUserInfo = (req, res) => {
+  const userId = req.user._id;
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({
+          message: 'Пользователь не найден',
+        });
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      handleValidationErrors(err, res);
+    });
+};
+
 const updateUserInfo = (req, res) => {
   const userId = req.user._id;
   const { name, about } = req.body;
@@ -138,6 +155,7 @@ module.exports = {
   getUserById,
   createUser,
   login,
+  getCurrentUserInfo,
   updateUserInfo,
   updateUserAvatar,
 };
