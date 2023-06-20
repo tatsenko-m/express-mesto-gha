@@ -47,6 +47,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
+    .select('+password')
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND).send({
@@ -69,7 +70,7 @@ const login = (req, res) => {
               sameSite: 'strict',
             });
 
-          return res.status(200).send(user);
+          return res.status(200).send(user.toSafeJSON());
         });
     })
     .catch((err) => {

@@ -32,8 +32,17 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
+    select: false,
     requred: true,
   },
 });
+
+// eslint-disable-next-line func-names
+userSchema.methods.toSafeJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+
+  return user;
+};
 
 module.exports = mongoose.model('user', userSchema);
