@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
+const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR, UNAUTHORIZED } = require('../constants/errorStatus');
 const { handleValidationErrors } = require('../helpers/errorHandlers');
 
 const getUsers = (req, res) => {
@@ -37,6 +37,39 @@ const createUser = (req, res) => {
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       handleValidationErrors(err, res);
+    });
+};
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  let authUser;
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({
+          message: 'Пользователь не найден',
+        });
+      }
+
+      authUser = user;
+
+      return bcrypt.compare(password, user.password);
+    })
+    .then((matched) => {
+      if (!matched) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+
+      return res.status(200).send(authUser);
+    })
+    .catch((err) => {
+      if (err.message === 'Неправильные почта или пароль') {
+        res.status(UNAUTHORIZED).send({ message: err.message });
+      } else {
+        res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
     });
 };
 
@@ -96,6 +129,7 @@ module.exports = {
   getUsers,
   getUserById,
   createUser,
+  login,
   updateUserInfo,
   updateUserAvatar,
 };
