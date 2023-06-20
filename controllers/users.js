@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require('../constants/errorStatus');
 const { handleValidationErrors } = require('../helpers/errorHandlers');
@@ -30,7 +31,9 @@ const getUserById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  User.create(req.body)
+  bcrypt
+    .hash(req.body.password, 10)
+    .then((hash) => User.create({ ...req.body, password: hash }))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       handleValidationErrors(err, res);
