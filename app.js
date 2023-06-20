@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { login, createUser } = require('./controllers/users');
 const router = require('./routes/index');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
@@ -17,6 +19,11 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.use(cookieParser());
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use(router);
 
