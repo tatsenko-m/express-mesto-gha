@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 const router = require('./routes/index');
 
 const app = express();
@@ -24,6 +25,8 @@ app.use(cookieParser());
 
 app.post('/signin', login);
 app.post('/signup', createUser);
+
+app.use(auth);
 
 app.use(router);
 
