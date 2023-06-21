@@ -1,64 +1,66 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  BAD_REQUEST, NOT_FOUND, SERVER_ERROR, UNAUTHORIZED,
-} = require('../constants/errorStatus');
-const { handleValidationErrors } = require('../helpers/errorHandlers');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+const ConflictError = require('../errors/ConflictError');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch(() => res
-      .status(SERVER_ERROR)
-      .send({
-        message: 'На сервере произошла ошибка',
-      }));
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   return User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({
-          message: 'Пользователь не найден',
-        });
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
-      handleValidationErrors(err, res);
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректный id'));
+      } else {
+        next(err);
+      }
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => User.create({ ...req.body, password: hash }))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      handleValidationErrors(err, res);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Пользователь с таким email уже существует'));
+      } else {
+        next(err);
+      }
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
     .select('+password')
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({
-          message: 'Пользователь не найден',
-        });
+        return next(new NotFoundError('Пользователь не найден'));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+            return next(new UnauthorizedError('Неправильные почта или пароль'));
           }
 
           const token = jwt.sign({ _id: user._id }, 'SECRET', { expiresIn: '7d' });
@@ -73,40 +75,34 @@ const login = (req, res) => {
           return res.status(200).send(user.toSafeJSON());
         });
     })
-    .catch((err) => {
-      if (err.message === 'Неправильные почта или пароль') {
-        res.status(UNAUTHORIZED).send({ message: err.message });
-      } else {
-        res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
-const getCurrentUserInfo = (req, res) => {
+const getCurrentUserInfo = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({
-          message: 'Пользователь не найден',
-        });
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
-      handleValidationErrors(err, res);
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректный id'));
+      } else {
+        next(err);
+      }
     });
 };
 
-const updateUserInfo = (req, res) => {
+const updateUserInfo = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
 
   if (!name && !about) {
-    return res.status(BAD_REQUEST).send({
-      message: 'Переданы некорректные данные',
-    });
+    next(new BadRequestError('Переданы некорректные данные'));
   }
 
   return User.findByIdAndUpdate(
@@ -116,23 +112,25 @@ const updateUserInfo = (req, res) => {
   )
     .then((updatedUser) => {
       if (!updatedUser) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.status(200).send(updatedUser);
     })
     .catch((err) => {
-      handleValidationErrors(err, res);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
     });
 };
 
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
 
   if (!avatar) {
-    return res.status(BAD_REQUEST).send({
-      message: 'Переданы некорректные данные',
-    });
+    next(new BadRequestError('Переданы некорректные данные'));
   }
 
   return User.findByIdAndUpdate(
@@ -142,12 +140,16 @@ const updateUserAvatar = (req, res) => {
   )
     .then((updatedUser) => {
       if (!updatedUser) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.status(200).send(updatedUser);
     })
     .catch((err) => {
-      handleValidationErrors(err, res);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
     });
 };
 
