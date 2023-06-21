@@ -5,7 +5,7 @@ const { celebrate, Joi, errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const router = require('./routes/index');
-// const { regex } = require('./constants/regex');
+const { regex } = require('./constants/regex');
 
 const app = express();
 
@@ -28,7 +28,7 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(/https?:\/\/(www\.)?[-a-zA-Z0-9._~:/?#[\]@!$&'()*+,;=]+#?$/),
+    avatar: Joi.string().regex(regex),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),

@@ -3,14 +3,14 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getCards, createCard, deleteCardById, likeCard, unlikeCard,
 } = require('../controllers/cards');
-// const { regex } = require('../constants/regex');
+const { regex } = require('../constants/regex');
 
 router.get('/', getCards);
 
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().regex(/https?:\/\/(www\.)?[-a-zA-Z0-9._~:/?#[\]@!$&'()*+,;=]+#?$/),
+    link: Joi.string().required().regex(regex),
   }),
 }), createCard);
 
