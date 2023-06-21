@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const regex = require('../constants/regex');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -22,7 +21,7 @@ const userSchema = new mongoose.Schema({
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     required: true,
     validate: {
-      validator: (field) => regex.test(field),
+      validator: (field) => validator.isURL(field),
       message: 'Некорректный формат ссылки на аватар',
     },
   },
