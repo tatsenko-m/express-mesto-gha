@@ -35,7 +35,7 @@ const createUser = (req, res, next) => {
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => User.create({ ...req.body, password: hash }))
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(201).send(user.toSafeJSON()))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
