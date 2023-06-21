@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const auth = (req, res, next) => {
   const token = req.cookies.jwt;
@@ -8,7 +9,7 @@ const auth = (req, res, next) => {
     payload = jwt.verify(token, 'SECRET');
   } catch (err) {
     res.status(401);
-    return next(new Error('Неверный или истекший токен'));
+    return next(new UnauthorizedError('Неверный или истекший токен'));
   }
 
   req.user = payload;
