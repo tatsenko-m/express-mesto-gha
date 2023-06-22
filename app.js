@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const errorHandler = require('./middlewares/error-handler');
 const router = require('./routes/index');
 const { regex } = require('./constants/regex');
 
@@ -42,15 +43,4 @@ app.listen(3000);
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
-});
+app.use(errorHandler);
