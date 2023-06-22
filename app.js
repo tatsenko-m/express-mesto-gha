@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 const { celebrate, Joi, errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -10,13 +11,13 @@ const { regex } = require('./constants/regex');
 
 const app = express();
 
+app.use(helmet());
+app.use(express.json());
+app.use(cookieParser());
+
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
-
-app.use(express.json());
-
-app.use(cookieParser());
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
